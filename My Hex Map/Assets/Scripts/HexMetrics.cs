@@ -6,13 +6,13 @@ public static class HexMetrics {
 
 	public const float innerRadius = outerRadius * 0.866025404f;
 
+    //核心区域的大小占比
+	public const float solidFactor = 0.8f;
     //边缘因子（用于混合）
-	public const float solidFactor = 0.75f;
-
-	public const float blendFactor = 1f - solidFactor;
+    public const float blendFactor = 1f - solidFactor;
 
     //单位高度
-	public const float elevationStep = 5f;
+	public const float elevationStep = 3f;
 
     //边缘矩形区域相关
     //平台数量
@@ -23,7 +23,12 @@ public static class HexMetrics {
 	public const float horizontalTerraceStepSize = 1f / terraceSteps;
     //每步的垂直分量
 	public const float verticalTerraceStepSize = 1f / (terracesPerSlope + 1);
-
+    //扰动强度（纹理坐标范围0`1 -->-1~1  三个方向  最大位移 1*1*1 = 1.7  目前外径10，故需要将扰动放大）
+	public const float cellPerturbStrength = 4f;
+    //单元格整体的在Y方向的扰动强度
+	public const float elevationPerturbStrength = 1.5f;
+    //扰动的缩放因子 （使得一张扰动图 能覆盖更多的格子）
+	public const float noiseScale = 0.003f;
 	//六边形的顶点列表
 	static Vector3[] corners = {
 		new Vector3(0f, 0f, outerRadius),
@@ -34,6 +39,16 @@ public static class HexMetrics {
 		new Vector3(-innerRadius, 0f, 0.5f * outerRadius),
 		new Vector3(0f, 0f, outerRadius)
 	};
+    //扰动图源
+    public static Texture2D noiseSource;
+    //扰动纹理采样
+    public static Vector4 SampleNoise (Vector3 position) {
+        //将世界坐标根当作UV坐标返回颜色
+        return noiseSource.GetPixelBilinear(
+			position.x * noiseScale,
+			position.z * noiseScale
+		);
+	}
 
 	public static Vector3 GetFirstCorner (HexDirection direction) {
 		return corners[(int)direction];
